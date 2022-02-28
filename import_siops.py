@@ -180,7 +180,7 @@ for i in pastas_export_receitas:
 for i in range(len(caminho_import_receitas)):
     imp_exp_siops_receitas(caminho_import_receitas[i], caminho_export_receitas[i])
 
-
+# aqui acaba a parte de estruturação das bases e conversão das mesmas em .xlsx para .csv
 #############################################################
 # Criação das pastas para a exportação dos arquivos .dta (STATA)
 #############################################################
