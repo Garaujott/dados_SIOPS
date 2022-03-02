@@ -1,9 +1,96 @@
 import os
 import pandas as pd
 
-###########################################################
-# Importação das tabelas de DESPESAS
-###########################################################
+
+def gerar_caminho_despesas_xlsx(periodo_anos, nomes_categorias, nomes_arquivos):
+    caminho_import_despesas = []
+    for periodo in range(len(periodo_anos)):
+        for categoria in range(len(nomes_categorias)):
+            for arquivo in range(len(nomes_arquivos)):
+                caminho_import_despesas.append('\\data\\' + periodo_anos[periodo] +
+                                               '\\Despesa\\' + nomes_categorias[categoria] +
+                                               '\\' + nomes_arquivos[arquivo] + '.xlsx')
+    return caminho_import_despesas
+
+
+def gerar_caminho_despesas_csv(periodo_anos, nomes_categorias, nomes_arquivos):
+    caminho_export = []
+    for periodo in range(len(periodo_anos)):
+        for categoria in range(len(nomes_categorias)):
+            for arquivo in range(len(nomes_arquivos)):
+                caminho_export.append('\\data\\' + periodo_anos[periodo] +
+                                      '\\OutrosFormatos\\csv' + '\\Despesa\\' +
+                                      nomes_categorias[categoria] + '\\' + nomes_arquivos[arquivo] + '.csv')
+
+    return caminho_export
+
+
+def gerar_caminho_receitas_xlsx(periodo_anos, nomes_arquivos):
+    caminho_import_receitas = []
+    for periodo in range(len(periodo_anos)):
+        caminho_import_receitas.append('\\data\\' + periodo_anos[periodo] +
+                                       '\\Receita\\' + nomes_arquivos[periodo] + '.xlsx')
+
+    return caminho_import_receitas
+
+
+def gerar_caminho_receitas_csv(periodo_anos, nomes_arquivos):
+    caminho_export_receitas = []
+    for periodo in range(len(periodo_anos)):
+        caminho_export_receitas.append('\\data\\' + periodo_anos[periodo] +
+                                       '\\OutrosFormatos\\csv' + '\\Receita\\' +
+                                       nomes_arquivos[periodo] + '.csv')
+
+    return caminho_export_receitas
+
+
+def gerar_pastas_despesas_csv(periodo_anos, nomes_categorias):
+    pastas_despesas_csv = []
+    for periodo in range(len(periodo_anos)):
+        for categoria in range(len(nomes_categorias)):
+            pastas_despesas_csv.append('\\data\\' + periodo_anos[periodo] +
+                                       '\\OutrosFormatos\\csv' + '\\Despesa\\'
+                                       + nomes_categorias[categoria])
+
+    for pasta in pastas_despesas_csv:
+        os.makedirs(os.getcwd() + pasta, mode=0o666, exist_ok=True)
+
+    print('Pastas para a exportação dos arquivos de despesas em .csv foram criadas')
+
+
+def gerar_pastas_receitas_csv(periodo_anos):
+    pastas_export_receitas = []
+    for periodo in range(len(periodo_anos)):
+        pastas_export_receitas.append('\\data\\' + periodo_anos[periodo] + '\\OutrosFormatos\\csv' + '\\Receita\\')
+
+    for pasta in pastas_export_receitas:
+        os.makedirs(os.getcwd() + pasta, mode=0o666, exist_ok=True)
+
+    print('Pastas para a exportação dos arquivos de receitas em .csv foram criadas')
+
+
+def gerar_pastas_despesas_dta(periodo_anos, nomes_categorias):
+    pastas_despesas_dta = []
+    for periodo in range(len(periodo_anos)):
+        for categoria in range(len(nomes_categorias)):
+            pastas_despesas_dta.append('\\data\\' + periodo_anos[periodo] +
+                                       '\\OutrosFormatos\\dta' + '\\Despesa\\' + nomes_categorias[categoria])
+
+    for pasta in pastas_despesas_dta:
+        os.makedirs(os.getcwd() + pasta, mode=0o666, exist_ok=True)
+
+    print('Pastas para a exportação dos arquivos de despesas em .dta foram criadas')
+
+
+def gerar_pastas_receitas_dta(periodo_anos):
+    pastas_export_receitas_dta = []
+    for periodo in range(len(periodo_anos)):
+        pastas_export_receitas_dta.append('\\data\\' + periodo_anos[periodo] + '\\OutrosFormatos\\dta' + '\\Receita\\')
+
+    for pasta in pastas_export_receitas_dta:
+        os.makedirs(os.getcwd() + pasta, mode=0o666, exist_ok=True)
+
+    print('Pastas para a exportação dos arquivos de receitas em .dta foram criadas')
 
 
 def imp_exp_siops_despesas(arquivo_import, arquivo_export):
@@ -32,74 +119,24 @@ def imp_exp_siops_despesas(arquivo_import, arquivo_export):
 
     dados_final = pd.DataFrame()
 
-    for k, i, l, j in zip(lst_cat_var, lst_categorias, lst_categorias_num, lst_slices):
-        k = []
-        k = pd.concat(objs=[cols_ident, j], axis=1)
-        k.columns = colunas
-        k['Categoria'] = i
-        k['Categoria_num'] = l
+    for cat, categoria, cat_num, fatia in zip(lst_cat_var, lst_categorias, lst_categorias_num, lst_slices):
+        cat = pd.concat(objs=[cols_ident, fatia], axis=1)
+        cat.columns = colunas
+        cat['Categoria'] = categoria
+        cat['Categoria_num'] = cat_num
         cols = ['Categoria'] + ['Categoria_num'] + colunas
-        k = k[cols]
+        cat = cat[cols]
 
-        k['ESTADO'] = k['ESTADO'].str.strip()
-        k['COD. ESTADO'] = k['COD. ESTADO'].astype(int).astype(str)
-        k[colunas_valores] = k[colunas_valores].astype(float)
-        k.reset_index(drop=True, inplace=True)
+        cat['ESTADO'] = cat['ESTADO'].str.strip()
+        cat['COD. ESTADO'] = cat['COD. ESTADO'].astype(int).astype(str)
+        cat[colunas_valores] = cat[colunas_valores].astype(float)
+        cat.reset_index(drop=True, inplace=True)
 
-        dados_final = pd.concat([dados_final, k], axis=0)
+        dados_final = pd.concat([dados_final, cat], axis=0)
 
     dados_final.to_csv(path_or_buf=os.getcwd() + arquivo_export, index=False, encoding='iso-8859-1')
     print(f'{arquivo_export} exportado')
 
-# Preparando os caminhos para importar e exportar os arquivos
-
-
-anos = ['2018', '2019', '2020']
-
-pastas = ['1 - Recursos Ordinários - Fonte Livre',
-          '2 - Receitas de Impostos e Transferencias de Impostos',
-          '3 - Transferência Fundo a Fundo de Recursos do SUS Provenientes do Governo Federal',
-          '4 -Transferência Fundo a Fundo de Recursos do SUS Provenientes do Governo Estadual',
-          '5 - Transferência de Convênios ou de Contratos de Repasse Vinculados à Saúde',
-          '6 - Operações de Crédito Vinculadas à Saúde',
-          '7 - Royalties de Petróleo Vinculadas à Saúde',
-          '8 - Outros Recursos Vinculados à Saúde']
-
-arquivos = ['301 - Atenção Basica', '302 - Assistência Hospitalar Ambulatorial',
-            '303 - Suporte Profilático Terapêutico', '304 - Vigilância Sanitária',
-            '305 - Vigilância Epidemiológica', '306 - Alimentação e Nutrição',
-            'Administrativas', 'Informações Complementares']
-
-caminho_import = []
-
-for i in range(len(anos)):
-    for j in range(len(pastas)):
-        for k in range(len(arquivos)):
-            caminho_import.append('\\data\\' + anos[i] + '\\Despesa\\' + pastas[j] + '\\' + arquivos[k] + '.xlsx')
-
-caminho_export = []
-
-for i in range(len(anos)):
-    for j in range(len(pastas)):
-        for k in range(len(arquivos)):
-            caminho_export.append(
-                '\\data\\' + anos[i] + '\\OutrosFormatos\\csv' + '\\Despesa\\' + pastas[j] + '\\' + arquivos[k] + '.csv')
-
-pastas_export = []
-for i in range(len(anos)):
-    for j in range(len(pastas)):
-            pastas_export.append('\\data\\' + anos[i] + '\\OutrosFormatos\\csv' + '\\Despesa\\' + pastas[j])
-
-for i in pastas_export:
-    os.makedirs(os.getcwd() + i, mode=0o666, exist_ok=True)
-
-# exportando os arquivos .csv de receitas
-for i in range(len(caminho_import)):
-    imp_exp_siops_despesas(caminho_import[i], caminho_export[i])
-
-###########################################################
-# Importação das tabelas de RECEITAS
-###########################################################
 
 def imp_exp_siops_receitas(arquivo_import, arquivo_export):
     dados = pd.read_excel(os.getcwd() + arquivo_import)
@@ -136,81 +173,78 @@ def imp_exp_siops_receitas(arquivo_import, arquivo_export):
 
     dados_final = pd.DataFrame()
 
-    for k, i, l, j in zip(lst_cat_var, lst_categorias, lst_categorias_num, lst_slices):
-        k = []
-        k = pd.concat(objs=[cols_ident, j], axis=1)
-        k.columns = colunas
-        k['Categoria'] = i
-        k['Categoria_num'] = l
+    for cat, categoria, cat_num, fatia in zip(lst_cat_var, lst_categorias, lst_categorias_num, lst_slices):
+        cat = pd.DataFrame()
+        cat = pd.concat(objs=[cols_ident, fatia], axis=1)
+        cat.columns = colunas
+        cat['Categoria'] = categoria
+        cat['Categoria_num'] = cat_num
         cols = ['Categoria'] + ['Categoria_num'] + colunas
-        k = k[cols]
+        cat = cat[cols]
 
-        k['ESTADO'] = k['ESTADO'].str.strip()
-        k['COD. ESTADO'] = k['COD. ESTADO'].astype(int).astype(str)
-        k[colunas_valores] = k[colunas_valores].astype(float)
-        k.reset_index(drop=True, inplace=True)
+        cat['ESTADO'] = cat['ESTADO'].str.strip()
+        cat['COD. ESTADO'] = cat['COD. ESTADO'].astype(int).astype(str)
+        cat[colunas_valores] = cat[colunas_valores].astype(float)
+        cat.reset_index(drop=True, inplace=True)
 
-        dados_final = pd.concat([dados_final, k], axis=0)
+        dados_final = pd.concat([dados_final, cat], axis=0)
 
     dados_final.to_csv(path_or_buf=os.getcwd() + arquivo_export, index=False, encoding='iso-8859-1')
     print(f'{arquivo_export} exportado')
 
-# Preparando os caminhos para importar e exportar os arquivos
 
-
+###########################################################
+# definindo listas
+###########################################################
 anos = ['2018', '2019', '2020']
-receitas = ['Estadual - Receitas de 2018', 'Estadual - Receitas de 2019', 'Estadual - Receitas de 2020']
 
-caminho_import_receitas = []
-for k in range(len(anos)):
-    caminho_import_receitas.append('\\data\\' + anos[k] + '\\Receita\\' + receitas[k] + '.xlsx')
+categorias_despesas = ['1 - Recursos Ordinários - Fonte Livre',
+                       '2 - Receitas de Impostos e Transferencias de Impostos',
+                       '3 - Transferência Fundo a Fundo de Recursos do SUS Provenientes do Governo Federal',
+                       '4 -Transferência Fundo a Fundo de Recursos do SUS Provenientes do Governo Estadual',
+                       '5 - Transferência de Convênios ou de Contratos de Repasse Vinculados à Saúde',
+                       '6 - Operações de Crédito Vinculadas à Saúde',
+                       '7 - Royalties de Petróleo Vinculadas à Saúde',
+                       '8 - Outros Recursos Vinculados à Saúde']
 
-caminho_export_receitas = []
-for k in range(len(anos)):
-    caminho_export_receitas.append('\\data\\' + anos[k] + '\\OutrosFormatos\\csv' + '\\Receita\\' + receitas[k] + '.csv')
+arquivos_despesas = ['301 - Atenção Basica', '302 - Assistência Hospitalar Ambulatorial',
+                     '303 - Suporte Profilático Terapêutico', '304 - Vigilância Sanitária',
+                     '305 - Vigilância Epidemiológica', '306 - Alimentação e Nutrição',
+                     'Administrativas', 'Informações Complementares']
 
-pastas_export_receitas = []
-for k in range(len(anos)):
-    pastas_export_receitas.append('\\data\\' + anos[k] + '\\OutrosFormatos\\csv' + '\\Receita\\')
+arquivos_receitas = ['Estadual - Receitas de 2018', 'Estadual - Receitas de 2019', 'Estadual - Receitas de 2020']
 
-for i in pastas_export_receitas:
-    os.makedirs(os.getcwd() + i, mode=0o666, exist_ok=True)
+caminho_despesas_xlsx = gerar_caminho_despesas_xlsx(periodo_anos=anos,
+                                                    nomes_categorias=categorias_despesas,
+                                                    nomes_arquivos=arquivos_despesas)
+
+caminho_despesas_csv = gerar_caminho_despesas_csv(periodo_anos=anos,
+                                                  nomes_categorias=categorias_despesas,
+                                                  nomes_arquivos=arquivos_despesas)
+
+caminho_receitas_xlsx = gerar_caminho_receitas_xlsx(periodo_anos=anos,
+                                                    nomes_arquivos=arquivos_receitas)
+
+caminho_receitas_csv = gerar_caminho_receitas_csv(periodo_anos=anos,
+                                                  nomes_arquivos=arquivos_receitas)
+
+gerar_pastas_despesas_csv(periodo_anos=anos,
+                          nomes_categorias=categorias_despesas)
+
+gerar_pastas_receitas_csv(periodo_anos=anos)
+
+# exportando os arquivos .csv de despesas
+for item in range(len(caminho_despesas_xlsx)):
+    imp_exp_siops_despesas(caminho_despesas_xlsx[item], caminho_despesas_csv[item])
 
 # exportando os arquivos .csv de receitas
-for i in range(len(caminho_import_receitas)):
-    imp_exp_siops_receitas(caminho_import_receitas[i], caminho_export_receitas[i])
+for item in range(len(caminho_receitas_xlsx)):
+    imp_exp_siops_receitas(caminho_receitas_xlsx[item], caminho_receitas_csv[item])
 
-# aqui acaba a parte de estruturação das bases e conversão das mesmas em .xlsx para .csv
-#############################################################
-# Criação das pastas para a exportação dos arquivos .dta (STATA)
-#############################################################
+# aqui acaba a parte de estruturação das bases e conversão das mesmas em .xlsx para .csv;
+# começa a criacão de pastas .dta
 
-anos = ['2018', '2019', '2020']
+gerar_pastas_despesas_dta(periodo_anos=anos,
+                          nomes_categorias=categorias_despesas)
 
-pastas = ['1 - Recursos Ordinários - Fonte Livre',
-          '2 - Receitas de Impostos e Transferencias de Impostos',
-          '3 - Transferência Fundo a Fundo de Recursos do SUS Provenientes do Governo Federal',
-          '4 -Transferência Fundo a Fundo de Recursos do SUS Provenientes do Governo Estadual',
-          '5 - Transferência de Convênios ou de Contratos de Repasse Vinculados à Saúde',
-          '6 - Operações de Crédito Vinculadas à Saúde',
-          '7 - Royalties de Petróleo Vinculadas à Saúde',
-          '8 - Outros Recursos Vinculados à Saúde']
-
-pastas_export_dta = []
-for i in range(len(anos)):
-    for j in range(len(pastas)):
-            pastas_export.append('\\data\\' + anos[i] + '\\OutrosFormatos\\dta' + '\\Despesa\\' + pastas[j])
-
-for i in pastas_export:
-    os.makedirs(os.getcwd() + i, mode=0o666, exist_ok=True)
-
-#############################################################
-anos = ['2018', '2019', '2020']
-receitas = ['Estadual - Receitas de 2018', 'Estadual - Receitas de 2019', 'Estadual - Receitas de 2020']
-
-pastas_export_receitas_dta = []
-for k in range(len(anos)):
-    pastas_export_receitas_dta.append('\\data\\' + anos[k] + '\\OutrosFormatos\\dta' + '\\Receita\\')
-
-for i in pastas_export_receitas_dta:
-    os.makedirs(os.getcwd() + i, mode=0o666, exist_ok=True)
+gerar_pastas_receitas_dta(periodo_anos=anos)
